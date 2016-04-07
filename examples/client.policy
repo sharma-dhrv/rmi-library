@@ -1,0 +1,4 @@
+// You'll want to change this to match your own host
+grant codeBase "file:/Users/vbk/Documents/CSE291-DS/project1/examples/" {
+    permission java.security.AllPermission;
+};
