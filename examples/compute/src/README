@@ -1,0 +1,9 @@
+README
+
+Run instructions:-
+
+export _JAVA_OPTIONS="-Djava.net.preferIPv4Stack=true"
+export classpath=/home/dhruv/workspace/java-rmi/src/
+rmiregistry 2001 &
+./server.sh
+./client.sh

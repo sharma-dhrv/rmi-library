@@ -1,0 +1,3 @@
+grant codeBase "file:/home/dhruv/workspace/java-rmi/src/" {
+	permission java.security.AllPermission;
+};
