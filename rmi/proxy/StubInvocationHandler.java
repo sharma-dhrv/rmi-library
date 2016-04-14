@@ -15,12 +15,12 @@ public class StubInvocationHandler implements InvocationHandler {
     Socket socket = new Socket(serverSocketAddress.getAddress(), serverSocketAddress.getPort());
 
     ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-    ObjectInputStream ois = new ObjectInputStream(socket.getObjectInputStream());
+    ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
 
     oos.writeObject(method);
     oos.writeObject(args);
 
-    Object obj; = ois.readObject();
+    Object obj = ois.readObject();
 
     return obj;
   }
