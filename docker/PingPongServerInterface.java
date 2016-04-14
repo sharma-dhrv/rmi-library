@@ -1,7 +1,6 @@
 import java.rmi.*;
 import java.rmi.server.*;
 
-interface HelloInterface extends Remote
-{
+public interface PingPongServerInterface extends Remote {
   public String ping(int idNumber) throws RemoteException;
 }
