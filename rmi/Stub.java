@@ -48,7 +48,22 @@ public abstract class Stub
     public static <T> T create(Class<T> c, Skeleton<T> skeleton)
         throws UnknownHostException
     {
-        throw new UnsupportedOperationException("not implemented");
+        if(c == null || skeleton == null) {
+            throw new NullPointerException("Paramaters of create method should be non-null.");
+        }
+
+        if(!RMIException.isRemoteInterface(c)) {
+            throw new Error("c is not a remote interface.");
+        }
+
+        InetSocketAddress remoteAddress = skeleton.getAddress();
+        if(remoteAddress == null) {
+            throw new IllegalStateException();
+        }
+
+        return doCreate(c, remoteAddress);
+
+        //throw new UnsupportedOperationException("not implemented");
     }
 
     /** Creates a stub, given a skeleton with an assigned address and a hostname
@@ -84,7 +99,23 @@ public abstract class Stub
     public static <T> T create(Class<T> c, Skeleton<T> skeleton,
                                String hostname)
     {
-        throw new UnsupportedOperationException("not implemented");
+        if(c == null || skeleton == null || hostname == null) {
+            throw new NullPointerException("Paramater of create should be non-null.");
+        }
+
+        if(!RMIException.isRemoteInterface(c)) {
+            throw new Error("c is not a remote interface.");
+        }
+
+        InetSocketAddress address  = skeleton.getAddress();
+        if(address == null) {
+            throw new IllegalStateException("skeleton is not assigned a port.");
+        }
+
+        InetSocketAddress remoteAddress = new InetSocketAddress(hostname, address.getPort());
+
+        return doCreate(c, remoteAddress);
+        //throw new UnsupportedOperationException("not implemented");
     }
 
     /** Creates a stub, given the address of a remote server.
@@ -106,6 +137,20 @@ public abstract class Stub
      */
     public static <T> T create(Class<T> c, InetSocketAddress address)
     {
-        throw new UnsupportedOperationException("not implemented");
+        if(c == null || address == null) {
+            throw new NullPointerException("Paramater of create should be non-null.");
+        }
+
+        if(!RMIException.isRemoteInterface(c)) {
+           throw new Error("c is not a remote interface.");
+        }
+
+        return doCreate(c, address);
+    }
+
+    private static <T> T doCreate(Class<T> c, InetSocketAddress address) {
+      InvocationHandler invocationHandler = new StubInvocationHandler(address);
+      T instance = (T) Proxy.newProxyInstance(c.getClassLoader(), new Class[] { c }, invocationHandler);
+      return instance;
     }
 }
