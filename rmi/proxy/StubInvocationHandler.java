@@ -64,7 +64,8 @@ public class StubInvocationHandler implements InvocationHandler {
 			throw (Throwable) (new RMIException(e));
 		}
 
-		request = new RMIRequest(proxy.getClass(), method, args);
+		System.out.println("Calling Remote Method: " + proxy.getClass().getName() + "." + method.getName() + "(" + args + ")");
+		request = new RMIRequest(proxy.getClass().getName(), method.getName(), args);
 		try {
 		out.writeObject(request);
 		} catch (IOException e) {

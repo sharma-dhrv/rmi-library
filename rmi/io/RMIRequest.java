@@ -4,26 +4,28 @@
 
 package rmi.io;
 
-import java.lang.reflect.Method;
+import java.io.Serializable;
 
-public class RMIRequest {
-
-	private Class objectClass;
-	private Method method;
+public class RMIRequest implements Serializable {
+	
+	private static final long serialVersionUID = -2462856798587765532L;
+	
+	private String className;
+	private String methodName;
 	private Object[] arguments;
 
-	public RMIRequest(Class objectClass, Method method, Object[] arguments) {
-		this.objectClass = objectClass;
-		this.method = method;
+	public RMIRequest(String className, String methodName, Object[] arguments) {
+		this.className = className;
+		this.methodName = methodName;
 		this.arguments = arguments;
 	}
 	
-	public Class getObjectClass() {
-		return objectClass;
+	public String getClassName() {
+		return className;
 	}
 
-	public Method getMethod() {
-		return method;
+	public String getMethodName() {
+		return methodName;
 	}
 
 	public Object[] getArguments() {

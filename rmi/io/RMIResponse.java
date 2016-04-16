@@ -4,7 +4,11 @@
 
 package rmi.io;
 
-public class RMIResponse {
+import java.io.Serializable;
+
+public class RMIResponse implements Serializable {
+	
+	private static final long serialVersionUID = -8899349477943341489L;
 	
 	private Object returnValue;
 	private Exception exception;

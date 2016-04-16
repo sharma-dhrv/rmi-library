@@ -33,6 +33,8 @@ public class ListenerThread<T> extends Thread {
 	}
 
 	public void run() {
+		
+		isActive = true;
 
 		while (isActive) {
 			Socket clientConnection = null;
