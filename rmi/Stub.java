@@ -1,6 +1,11 @@
 package rmi;
 
-import java.net.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.net.InetSocketAddress;
+import java.rmi.UnknownHostException;
+
+import rmi.proxy.StubInvocationHandler;
 
 /** RMI stub factory.
 
@@ -52,11 +57,11 @@ public abstract class Stub
             throw new NullPointerException("Paramaters of create method should be non-null.");
         }
 
-        if(!RMIException.isRemoteInterface(c)) {
+        if(!RemoteInterfacePattern.isRemoteInterface(c)) {
             throw new Error("c is not a remote interface.");
         }
 
-        InetSocketAddress remoteAddress = skeleton.getAddress();
+        InetSocketAddress remoteAddress = skeleton.getBindAddress();
         if(remoteAddress == null) {
             throw new IllegalStateException();
         }
@@ -103,11 +108,11 @@ public abstract class Stub
             throw new NullPointerException("Paramater of create should be non-null.");
         }
 
-        if(!RMIException.isRemoteInterface(c)) {
+        if(!RemoteInterfacePattern.isRemoteInterface(c)) {
             throw new Error("c is not a remote interface.");
         }
 
-        InetSocketAddress address  = skeleton.getAddress();
+        InetSocketAddress address  = skeleton.getBindAddress();
         if(address == null) {
             throw new IllegalStateException("skeleton is not assigned a port.");
         }
@@ -141,7 +146,7 @@ public abstract class Stub
             throw new NullPointerException("Paramater of create should be non-null.");
         }
 
-        if(!RMIException.isRemoteInterface(c)) {
+        if(!RemoteInterfacePattern.isRemoteInterface(c)) {
            throw new Error("c is not a remote interface.");
         }
 

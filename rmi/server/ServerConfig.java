@@ -1,3 +1,5 @@
+package rmi.server;
+
 /*
   * Intergace which stores
   * some configuration information

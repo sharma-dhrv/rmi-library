@@ -1,51 +1,38 @@
+/**
+ * @author Dhruv Sharma (dhsharma@cs.ucsd.edu)
+ */
+
 package rmi;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class ListenerThread<T> extends Thread {
 
-	public static final int maxQueueLength = 50;
-
 	private Skeleton<T> container;
 	private T serverObj;
 	private Class<T> serverClass;
-	private InetSocketAddress bindAddress;
-	private boolean isActive;
 	private ServerSocket listenerSocket;
+	private boolean isActive;
 	private Throwable cause;
 
 	private ExecutorService threadPool = Executors.newCachedThreadPool();
 
-	public ListenerThread(Skeleton<T> container, Class<T> serverClass, T serverObj, InetSocketAddress bindAddress) {
+	public ListenerThread(Skeleton<T> container, Class<T> serverClass, T serverObj, ServerSocket listenerSocket) {
 		this.container = container;
 		this.serverObj = serverObj;
 		this.serverClass = serverClass;
-		this.bindAddress = bindAddress;
+		this.listenerSocket = listenerSocket;
 		this.isActive = false;
-		this.listenerSocket = null;
 		this.cause = null;
 	}
 
 	public void run() {
-
-		try {
-			listenerSocket = new ServerSocket(bindAddress.getPort(), maxQueueLength, bindAddress.getAddress());
-		} catch (IOException e) {
-			System.err.println("Failed to bind Skeleton listener: " + "ServerClass: " + serverClass.getName() + ", "
-					+ "IPAddress: " + bindAddress.getAddress().toString() + ", " + "Port: " + bindAddress.getPort());
-			e.printStackTrace();
-			isActive = container.listen_error(e);
-			if(!isActive) {
-				cause = (Throwable) e;
-			}
-		}
 
 		while (isActive) {
 			Socket clientConnection = null;
@@ -53,18 +40,25 @@ public class ListenerThread<T> extends Thread {
 				clientConnection = listenerSocket.accept();
 			} catch (IOException e) {
 				System.err.println("Failed to accept client connection: " + "ServerClass: " + serverClass.getName()
-						+ ", " + "IPAddress: " + bindAddress.getAddress().toString() + ", " + "Port: "
-						+ bindAddress.getPort());
+						+ ", " + "IPAddress: " + ((InetSocketAddress)listenerSocket.getLocalSocketAddress()).getHostString() + ", " + "Port: "
+						+ ((InetSocketAddress)listenerSocket.getLocalSocketAddress()).getPort());
 				e.printStackTrace();
 				isActive = container.listen_error(e);
 				if(!isActive) {
 					cause = (Throwable) e;
-					listenerSocket.close();
+					try {
+						listenerSocket.close();
+					} catch (IOException e1) {
+						System.err.println("Failed to close listener socket. Ignoring the exception: " + "ServerClass: " + serverClass.getName()
+						+ ", " + "IPAddress: " + ((InetSocketAddress)listenerSocket.getLocalSocketAddress()).getHostString() + ", " + "Port: "
+						+ ((InetSocketAddress)listenerSocket.getLocalSocketAddress()).getPort());
+						e1.printStackTrace();	
+					}
 					break;
 				}
 			}
 			
-			ServerInvocationHandler<T> handler = new ServerInvocationHandler<T>(container, serverObj, serverClass, clientConnection);
+			MethodInvocationTask<T> handler = new MethodInvocationTask<T>(container, serverObj, serverClass, clientConnection);
 			threadPool.execute(handler);
 		}
 		

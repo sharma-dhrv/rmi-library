@@ -1,8 +1,8 @@
 package rmi;
 
-import java.net.*;
-
-import com.sun.corba.se.spi.transport.SocketInfo;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 
 /**
  * RMI skeleton
@@ -27,14 +27,14 @@ import com.sun.corba.se.spi.transport.SocketInfo;
  * <code>service_error</code>.
  */
 public class Skeleton<T> {
-	public static String defaultWildcardIPAddress = "0.0.0.0";
-	public static int defaultPort = 3000; // Replace this with auto-generated
-											// Port field.
+	
+	public static final int maxQueueLength = 50;
 
 	private T serverObject;
 	private Class<T> serverClass;
 	private InetSocketAddress bindAddress;
-	private ListenerThread listener;
+	private ListenerThread<T> listener;
+	private ServerSocket listenerSocket;
 
 	private boolean isActive;
 
@@ -62,12 +62,25 @@ public class Skeleton<T> {
 	 *             <code>null</code>.
 	 */
 	public Skeleton(Class<T> c, T server) {
+
+		if (c == null) {
+			throw new NullPointerException("Server object's class cannot be null.");
+		}
+
+		if (server == null) {
+			throw new NullPointerException("Server object cannot be null.");
+		}
+
+		if (!RemoteInterfacePattern.isRemoteInterface(c)) {
+			throw new Error("Not a remote interface: " + "ClassName: " + c.getName());
+		}
+
 		this.serverObject = server;
 		this.serverClass = c;
-		this.bindAddress = new InetSocketAddress(defaultWildcardIPAddress, defaultPort);
+		this.bindAddress = null;
+		this.listenerSocket = null;
 		this.listener = null;
 		this.isActive = false;
-		// throw new UnsupportedOperationException("not implemented");
 	}
 
 	/**
@@ -95,12 +108,25 @@ public class Skeleton<T> {
 	 *             <code>null</code>.
 	 */
 	public Skeleton(Class<T> c, T server, InetSocketAddress address) {
+
+		if (c == null) {
+			throw new NullPointerException("Server object's class cannot be null.");
+		}
+
+		if (server == null) {
+			throw new NullPointerException("Server object cannot be null.");
+		}
+
+		if (!RemoteInterfacePattern.isRemoteInterface(c)) {
+			throw new Error("Not a remote interface: " + "ClassName: " + c.getName());
+		}
+
 		this.serverObject = server;
 		this.serverClass = c;
 		this.bindAddress = address;
+		this.listenerSocket = null;
 		this.listener = null;
 		this.isActive = false;
-		// throw new UnsupportedOperationException("not implemented");
 	}
 
 	/**
@@ -133,6 +159,8 @@ public class Skeleton<T> {
 					+ "Port: " + bindAddress.getPort());
 		}
 		this.isActive = false;
+		this.listenerSocket = null;
+		this.listener = null;
 	}
 
 	/**
@@ -183,11 +211,28 @@ public class Skeleton<T> {
 	 *             has already been started and has not since stopped.
 	 */
 	public synchronized void start() throws RMIException {
-		
-		if(isActive) {
-			
+
+		if (!isActive) {
+			try {
+				if (bindAddress != null) {
+					listenerSocket = new ServerSocket(bindAddress.getPort(), maxQueueLength, bindAddress.getAddress());
+				} else {
+					listenerSocket = new ServerSocket(0, maxQueueLength);
+				}
+				listener = new ListenerThread<T>(this, serverClass, serverObject, listenerSocket);
+				listener.start();
+				isActive = true;
+			} catch (IOException e) {
+				System.err.println("Failed to bind Skeleton listener: " + "ServerClass: " + serverClass.getName() + ", "
+						+ "IPAddress: " + bindAddress.getAddress().toString() + ", " + "Port: "
+						+ bindAddress.getPort());
+				throw new RMIException(e);
+			}
+		} else {
+			throw new RMIException("Failed to start Skeleton listener. It is already active: " + "ServerClass: "
+					+ serverClass.getName() + ", " + "IPAddress: " + bindAddress.getAddress().toString() + ", "
+					+ "Port: " + bindAddress.getPort());
 		}
-		// throw new UnsupportedOperationException("not implemented");
 	}
 
 	/**
@@ -201,12 +246,16 @@ public class Skeleton<T> {
 	 * restarted.
 	 */
 	public synchronized void stop() {
-
-		// throw new UnsupportedOperationException("not implemented");
-
+		if (isActive) {
+			listener.terminate();
+		}
 	}
 
 	protected InetSocketAddress getBindAddress() {
-		return this.bindAddress;
+		if(isActive) {
+			return (InetSocketAddress) listenerSocket.getLocalSocketAddress();
+		}
+		
+		return null;
 	}
 }

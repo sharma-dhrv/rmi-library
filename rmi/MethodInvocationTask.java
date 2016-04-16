@@ -1,3 +1,7 @@
+/**
+ * @author Dhruv Sharma (dhsharma@cs.ucsd.edu)
+ */
+
 package rmi;
 
 import java.io.IOException;
@@ -9,14 +13,14 @@ import java.net.Socket;
 import rmi.io.RMIRequest;
 import rmi.io.RMIResponse;
 
-public class ServerInvocationHandler<T> implements Runnable {
+public class MethodInvocationTask<T> implements Runnable {
 
 	private Skeleton<T> container;
 	private T serverObj;
 	private Class<T> serverClass;
 	private Socket clientConnection;
 
-	public ServerInvocationHandler(Skeleton<T> container, T serverObj, Class<T> serverClass, Socket clientConnection) {
+	public MethodInvocationTask(Skeleton<T> container, T serverObj, Class<T> serverClass, Socket clientConnection) {
 		this.container = container;
 		this.serverObj = serverObj;
 		this.serverClass = serverClass;

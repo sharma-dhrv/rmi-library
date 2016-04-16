@@ -3,7 +3,9 @@ package rmi;
 /** RMI exceptions. */
 public class RMIException extends Exception
 {
-    /** Creates an <code>RMIException</code> with the given message string. */
+	private static final long serialVersionUID = -5373364859058750880L;
+
+	/** Creates an <code>RMIException</code> with the given message string. */
     public RMIException(String message)
     {
         super(message);
