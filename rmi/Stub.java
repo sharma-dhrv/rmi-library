@@ -1,3 +1,7 @@
+/**
+ * @author Karthikeyan Vasuki Balasubramaniam (kvasukib@cs.ucsd.edu)
+ */
+
 package rmi;
 
 import java.lang.reflect.InvocationHandler;
@@ -5,7 +9,6 @@ import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.rmi.UnknownHostException;
 
-import rmi.proxy.StubInvocationHandler;
 
 /** RMI stub factory.
 
@@ -153,9 +156,10 @@ public abstract class Stub
         return doCreate(c, address);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> T doCreate(Class<T> c, InetSocketAddress address) {
       InvocationHandler invocationHandler = new StubInvocationHandler(address);
-      T instance = (T) Proxy.newProxyInstance(c.getClassLoader(), new Class[] { c }, invocationHandler);
+      T instance = (T) Proxy.newProxyInstance(c.getClassLoader(), new Class<?>[] { c }, invocationHandler);
       return instance;
     }
 }

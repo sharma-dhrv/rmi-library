@@ -1,20 +1,23 @@
-package rmi.proxy;
+/**
+ * @author Karthikeyan Vasuki Balasubramaniam (kvasukib@cs.ucsd.edu)
+ */
+
+package rmi;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import rmi.RMIException;
-import rmi.RemoteInterfacePattern;
 import rmi.io.RMIRequest;
 import rmi.io.RMIResponse;
 
-public class StubInvocationHandler implements InvocationHandler {
+public class StubInvocationHandler implements InvocationHandler, Serializable {
 	private InetSocketAddress serverSocketAddress;
 
 	public StubInvocationHandler(InetSocketAddress address) {
@@ -67,7 +70,7 @@ public class StubInvocationHandler implements InvocationHandler {
 		System.out.println("Calling Remote Method: " + proxy.getClass().getName() + "." + method.getName() + "(" + args + ")");
 		request = new RMIRequest(proxy.getClass().getName(), method.getName(), args);
 		try {
-		out.writeObject(request);
+			out.writeObject(request);
 		} catch (IOException e) {
 			closeConnection(socket);
 			System.err.println("Failed to write request to socket.");
