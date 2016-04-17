@@ -9,6 +9,19 @@ import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.rmi.UnknownHostException;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+
+import rmi.io.RMIRequest;
+import rmi.io.RMIResponse;
+
 
 /** RMI stub factory.
 
@@ -25,6 +38,141 @@ import java.rmi.UnknownHostException;
  */
 public abstract class Stub
 {
+  private static class StubInvocationHandler implements InvocationHandler {
+    private InetSocketAddress serverSocketAddress;
+
+    public StubInvocationHandler(InetSocketAddress address) {
+      this.serverSocketAddress = address;
+    }
+
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+      String methodName = method.getName();
+      StubInvocationHandler sih = (StubInvocationHandler) Proxy.getInvocationHandler(proxy);
+
+      if (methodName.equals("equals")) {
+        equals(proxy);
+      }
+
+      if (methodName.equals("hashCode")) {
+        return sih.serverSocketAddress.hashCode() + proxy.getClass().hashCode();
+      }
+
+
+      try {
+        if (RemoteInterfacePattern.isRemoteMethod(method)) {
+          return remoteInvoke(proxy, method, args);
+        } else {
+          return localInvoke(proxy, method, args);
+        }
+      } catch (Throwable e) {
+        throw e;
+      }
+    }
+
+    // This is to handle a remote invoke
+    private Object remoteInvoke(Object proxy, Method method, Object[] args) throws Throwable {
+      Socket socket;
+      ObjectOutputStream out;
+      ObjectInputStream in;
+      RMIRequest request;
+      RMIResponse response;
+
+      try {
+        socket = new Socket();
+        socket.connect(serverSocketAddress);
+      } catch (IOException e) {
+        System.err.println("Failed to connect to server skeleton.");
+        throw (Throwable) (new RMIException(e));
+      }
+
+      try {
+        out = new ObjectOutputStream(socket.getOutputStream());
+        out.flush();
+      } catch (IOException e) {
+        closeConnection(socket);
+        System.err.println("Failed to connect to get OutputStream from socket.");
+        throw (Throwable) (new RMIException(e));
+      }
+      try {
+        in = new ObjectInputStream(socket.getInputStream());
+      } catch (IOException e) {
+        closeConnection(socket);
+        System.err.println("Failed to connect to get InputStream from socket.");
+        throw (Throwable) (new RMIException(e));
+      }
+
+      System.out.println("Calling Remote Method: " + proxy.getClass().getName() + "." + method.getName() + "(" + args + ")");
+      request = new RMIRequest(proxy.getClass().getName(), method.getName(), args);
+      try {
+        out.writeObject(request);
+      } catch (IOException e) {
+        closeConnection(socket);
+        System.err.println("Failed to write request to socket.");
+        throw (Throwable) (new RMIException(e));
+      }
+
+      try {
+        response = (RMIResponse) in.readObject();
+      } catch (ClassNotFoundException | IOException e) {
+        closeConnection(socket);
+        System.err.println("Failed to read response from socket.");
+        throw (Throwable) (new RMIException(e));
+      }
+
+      closeConnection(socket);
+
+      if(response.getException() == null) {
+        return response.getReturnValue();
+      } else {
+        System.err.println("Remote method execution threw an exception.");
+        throw (Throwable) (new RMIException(response.getException()));
+      }
+
+    }
+
+    public boolean equals (Object proxy) {
+
+        if (proxy == null) {
+            return false;
+        }
+
+        if (!Proxy.isProxyClass(proxy.getClass())) {
+          System.out.println("1f");
+          return false;
+        }
+
+        InvocationHandler sih = Proxy.getInvocationHandler(proxy);
+        if (!(sih instanceof StubInvocationHandler)) {
+          System.out.println("2f");
+          return false;
+        }
+
+        if (!serverSocketAddress.equals(((StubInvocationHandler) sih).serverSocketAddress)) {
+          System.out.println("3f");
+          return false;
+        }
+
+        return true;
+
+      }
+
+    // This is to handle a local invoke
+    private Object localInvoke(Object proxy, Method method, Object[] args) throws Throwable {
+      String methodName = method.getName();
+      StubInvocationHandler sih = (StubInvocationHandler) Proxy.getInvocationHandler(proxy);
+
+      return method.invoke(sih, args);
+    }
+
+    private void closeConnection(Socket socket) {
+      try {
+        socket.close();
+      } catch (IOException e) {
+        System.err.println("Failed to close socket.");
+      }
+    }
+  }
+
     /** Creates a stub, given a skeleton with an assigned adress.
 
         <p>
@@ -159,7 +307,7 @@ public abstract class Stub
     @SuppressWarnings("unchecked")
     private static <T> T doCreate(Class<T> c, InetSocketAddress address) {
       InvocationHandler invocationHandler = new StubInvocationHandler(address);
-      T instance = (T) Proxy.newProxyInstance(c.getClassLoader(), new Class<?>[] { c }, invocationHandler);
+      T instance = (T) Proxy.newProxyInstance(c.getClassLoader(), new Class<?> [] { c }, invocationHandler);
       return instance;
     }
 }

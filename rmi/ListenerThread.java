@@ -36,7 +36,7 @@ public class ListenerThread<T> extends Thread {
 		
 		isActive = true;
 
-		while (isActive) {
+		while (isActive && listenerSocket != null && !listenerSocket.isClosed()) {
 			Socket clientConnection = null;
 			try {
 				clientConnection = listenerSocket.accept();

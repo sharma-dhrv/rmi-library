@@ -408,6 +408,8 @@ public class StubTest extends Test
         {
             if(!stub1.equals(stub2))
             {
+		System.out.println(stub1.hashCode());
+		System.out.println(stub2.hashCode());
                 throw new TestFailed("stubs for the same skeleton are not " +
                                      "equal");
             }

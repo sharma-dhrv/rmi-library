@@ -7,6 +7,7 @@ class HelloClient
 
 
   // This takes one command line argument: A person's first name
+  @SuppressWarnings("deprecation")
   public static void main (String []args)
   {
     try 
