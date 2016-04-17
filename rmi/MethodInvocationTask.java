@@ -54,6 +54,7 @@ public class MethodInvocationTask<T> implements Runnable {
 
 		try {
 			outStream = new ObjectOutputStream(clientConnection.getOutputStream());
+			outStream.flush();
 		} catch (IOException e) {
 			System.err.println("Failed to get OutputStream from client connection: " + "ServerClass: "
 					+ serverClass.getName() + ", " + "IPAddress: " + container.getBindAddress().getAddress().toString()
