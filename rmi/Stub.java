@@ -137,18 +137,18 @@ public abstract class Stub
         }
 
         if (!Proxy.isProxyClass(proxy.getClass())) {
-          System.out.println("1f");
+          //System.out.println("1f");
           return false;
         }
 
         InvocationHandler sih = Proxy.getInvocationHandler(proxy);
         if (!(sih instanceof StubInvocationHandler)) {
-          System.out.println("2f");
+          //System.out.println("2f");
           return false;
         }
 
         if (!serverSocketAddress.equals(((StubInvocationHandler) sih).serverSocketAddress)) {
-          System.out.println("3f");
+          //System.out.println("3f");
           return false;
         }
 
