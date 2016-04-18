@@ -7,6 +7,7 @@ package rmi;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 
@@ -27,13 +28,13 @@ public class MethodInvocationTask<T> implements Runnable {
 		this.clientConnection = clientConnection;
 	}
 
-	private Method getMatchingMethod(String methodName, Object[] arguments) {
+	private Method getMatchingMethod(String methodName, String[] arguments) {
 		for (Method m : serverClass.getDeclaredMethods()) {
 			Class[] paramTypes = m.getParameterTypes();
 			if (methodName.equals(m.getName()) && arguments.length == paramTypes.length) {
 				boolean found = true;
 				for (int i = 0; i < arguments.length; i++) {
-					if (!paramTypes[i].equals(arguments[i])) {
+					if (!paramTypes[i].getName().equals(arguments[i])) {
 						found = false;
 					}
 				}
@@ -95,16 +96,25 @@ public class MethodInvocationTask<T> implements Runnable {
 		String className = request.getClassName();
 		String methodName = request.getMethodName();
 		Object[] arguments = request.getArguments();
+		String[] argumentTypes = request.getArgumentTypes();
 
 		if (className.equals(serverClass.getName())) {
 
-			Method matchingMethod = getMatchingMethod(methodName, arguments);
+			Method matchingMethod = getMatchingMethod(methodName, argumentTypes);
 			if (matchingMethod != null) {
 				try {
 					Object returnValue = matchingMethod.invoke(serverObj, arguments);
 					response = new RMIResponse(returnValue);
-				} catch (Exception e) {
-					response = new RMIResponse(e);
+				} catch (InvocationTargetException e) {
+					response = new RMIResponse((Exception) e.getTargetException());
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					System.err.println("Failed to invoke the designated method: " + "ServerClass: " + serverClass.getName() + ", "
+							+ "IPAddress: " + container.getBindAddress().getAddress().toString() + ", " + "Port: "
+							+ container.getBindAddress().getPort() + ", " + "ClientClass: " + className + ", " + "Method: "
+							+ methodName + ", " + "Arguments: " + arguments);
+					RMIException exception = new RMIException(e);
+					container.service_error(exception);
+					response = new RMIResponse(exception);
 				}
 			} else {
 				System.err.println("Failed to find a matching method: " + "ServerClass: " + serverClass.getName() + ", "

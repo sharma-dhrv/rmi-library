@@ -13,11 +13,13 @@ public class RMIRequest implements Serializable {
 	private String className;
 	private String methodName;
 	private Object[] arguments;
+	private String[] argumentTypes;
 
-	public RMIRequest(String className, String methodName, Object[] arguments) {
+	public RMIRequest(String className, String methodName, Object[] arguments, String[] argumentTypes) {
 		this.className = className;
 		this.methodName = methodName;
 		this.arguments = arguments;
+		this.argumentTypes = argumentTypes;
 	}
 	
 	public String getClassName() {
@@ -30,6 +32,10 @@ public class RMIRequest implements Serializable {
 
 	public Object[] getArguments() {
 		return arguments;
+	}
+	
+	public String[] getArgumentTypes() {
+		return argumentTypes;
 	}
 
 }
