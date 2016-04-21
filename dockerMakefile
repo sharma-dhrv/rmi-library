@@ -1,0 +1,13 @@
+all: interface client server
+
+interface: rmi/Skeleton.java rmi/Stub.java rmi/RemoteInterfacePattern.java rmi/RMIException.java rmi/ListenerThread.java rmi/MethodInvocationTask.java rmi/io/RMIRequest.java rmi/io/RMIResponse.java rmi/server/IPingServer.java rmi/server/PingServerFactory.java rmi/server/PingServer.java
+	javac  rmi/Skeleton.java rmi/Stub.java rmi/RemoteInterfacePattern.java rmi/RMIException.java rmi/ListenerThread.java rmi/MethodInvocationTask.java rmi/io/RMIRequest.java rmi/io/RMIResponse.java rmi/server/IPingServer.java rmi/server/PingServerFactory.java rmi/server/PingServer.java; jar cvf pingpong.jar rmi/*.class rmi/io/*.class rmi/server/*.class
+
+client: pingpong.jar rmi/client/ClientDriver.java
+	javac -cp pingpong.jar rmi/client/ClientDriver.java
+
+server: pingpong.jar rmi/server/ServerDriver.java
+	javac -cp pingpong.jar rmi/server/ServerDriver.java
+
+clean:
+	rm rmi/*.class rmi/io/*.class rmi/server/*.class rmi/client/*.class pingpong.jar
