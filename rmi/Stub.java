@@ -99,8 +99,8 @@ public abstract class Stub {
 			}
 
 			String[] argumentTypes = getArgumentTypes(method);
-			System.out.println("Calling Remote Method: " + method.getDeclaringClass().getName() + "." + method.getName()
-					+ "(" + args + " : " + argumentTypes.toString() + ")");
+			//System.out.println("Calling Remote Method: " + method.getDeclaringClass().getName() + "." + method.getName()
+			//		+ "(" + args + " : " + argumentTypes.toString() + ")");
 			request = new RMIRequest(method.getDeclaringClass().getName(), method.getName(), args, argumentTypes);
 			try {
 				out.writeObject(request);
@@ -123,7 +123,7 @@ public abstract class Stub {
 			if (response.getException() == null) {
 				return response.getReturnValue();
 			} else {
-				System.out.println("Remote method execution threw an exception." + response.getException().getClass().getName());
+				//System.out.println("Remote method execution threw an exception." + response.getException().getClass().getName());
 				throw (Throwable) response.getException();
 			}
 
@@ -136,18 +136,18 @@ public abstract class Stub {
 			}
 
 			if (!Proxy.isProxyClass(proxy.getClass())) {
-				System.out.println("1f");
+				//System.out.println("1f");
 				return false;
 			}
 
 			InvocationHandler sih = Proxy.getInvocationHandler(proxy);
 			if (!(sih instanceof StubInvocationHandler)) {
-				System.out.println("2f");
+				//System.out.println("2f");
 				return false;
 			}
 
 			if (!serverSocketAddress.equals(((StubInvocationHandler) sih).serverSocketAddress)) {
-				System.out.println("3f");
+				//System.out.println("3f");
 				return false;
 			}
 
@@ -234,7 +234,6 @@ public abstract class Stub {
 
 		return doCreate(c, remoteAddress);
 
-		// throw new UnsupportedOperationException("not implemented");
 	}
 
 	/**

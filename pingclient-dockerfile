@@ -1,0 +1,11 @@
+# PingPongClient Docker File
+
+FROM java
+
+MAINTAINER Dhruv Sharma
+
+RUN mkdir -p /rmi/client
+
+ADD pingpong.jar /pingpong.jar
+
+ADD rmi/client/ClientDriver.class /rmi/client/ClientDriver.class

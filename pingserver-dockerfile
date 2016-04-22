@@ -1,0 +1,13 @@
+# Catclient Docker File
+
+FROM java
+
+MAINTAINER Dhruv Sharma
+
+RUN mkdir -p /rmi/server
+
+ADD pingpong.jar /pingpong.jar
+
+ADD rmi/server/ServerDriver.class /rmi/server/ServerDriver.class
+
+ADD rmi/server/ServerDriver\$ShutdownThread.class /rmi/server/ServerDriver\$ShutdownThread.class

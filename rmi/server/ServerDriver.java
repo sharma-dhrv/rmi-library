@@ -17,16 +17,19 @@ public class ServerDriver {
 		}
 		
 		public void run() {
+			System.out.println("Stopping PingServer skeleton...");
 			for(Skeleton s : skeletons) {
 				s.stop();
 			}
+			System.out.println("Done. Bye!");
 		}
 	}
 
 	public static void main(String[] args) {
 		
+		int port = Integer.parseInt(args[0]);
 		IPingServer server = PingServerFactory.makePingServer();
-		Skeleton<IPingServer> skeleton = new Skeleton<IPingServer>(IPingServer.class, server, new InetSocketAddress(3000));
+		Skeleton<IPingServer> skeleton = new Skeleton<IPingServer>(IPingServer.class, server, new InetSocketAddress(port));
 		
 		ArrayList<Skeleton> skeletons = new ArrayList<>();
 		skeletons.add(skeleton);
@@ -35,6 +38,7 @@ public class ServerDriver {
 		
 		try {
 			skeleton.start();
+			System.out.println("PingServer skeleton is listening on port " + port + "...");
 		} catch (RMIException e) {
 			e.printStackTrace();
 		}
