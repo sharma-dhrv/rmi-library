@@ -11,15 +11,19 @@ package test;
  */
 class FatalError extends TestFailed
 {
+    public FatalError()
+    {
+      
+    }
     /** Constructs a <code>FatalError</code> object from an error message. */
-    FatalError(String message)
+    public FatalError(String message)
     {
         super(message);
     }
 
     /** Constructs a <code>FatalError</code> object from an error message and a
         cause. */
-    FatalError(String message, Throwable cause)
+    public FatalError(String message, Throwable cause)
     {
         super(message, cause);
     }

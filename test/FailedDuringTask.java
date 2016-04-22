@@ -4,9 +4,13 @@ package test;
     particular task. */
 class FailedDuringTask extends Exception
 {
+    public FailedDuringTask()
+    {
+
+    }
     /** Constructs a <code>FailedDuringTask</code> object with the given task
         message and underlying failure. */
-    FailedDuringTask(String task, Throwable cause)
+    public FailedDuringTask(String task, Throwable cause)
     {
         super(task, cause);
     }

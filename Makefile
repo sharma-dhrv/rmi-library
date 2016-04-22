@@ -49,6 +49,10 @@ test : all-classes
 	@echo
 	java conformance.ConformanceTests
 
+.PHONY : myTests
+myTests : all-classes
+	  java test.CTest
+
 # Delete all intermediate and final output and leave only the source.
 .PHONY : clean
 clean :

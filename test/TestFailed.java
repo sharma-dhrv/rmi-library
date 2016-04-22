@@ -4,7 +4,7 @@ package test;
 public class TestFailed extends Exception
 {
     /** Constructs a <code>TestFailed</code> object. */
-    protected TestFailed()
+    public TestFailed()
     {
     }
 

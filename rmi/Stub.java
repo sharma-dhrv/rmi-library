@@ -7,6 +7,7 @@ package rmi;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -333,7 +334,7 @@ public abstract class Stub {
 	@SuppressWarnings("unchecked")
 	private static <T> T doCreate(Class<T> c, InetSocketAddress address) {
 		InvocationHandler invocationHandler = new StubInvocationHandler(address);
-		T instance = (T) Proxy.newProxyInstance(c.getClassLoader(), new Class<?>[] { c }, invocationHandler);
+		T instance = (T) Proxy.newProxyInstance(c.getClassLoader(), new Class<?>[] { c, Serializable.class }, invocationHandler);
 		return instance;
 	}
 }

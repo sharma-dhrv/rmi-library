@@ -12,6 +12,7 @@ import java.io.*;
  */
 class TestReport implements Serializable
 {
+  
     /** Test class. */
     private final Class<? extends Test>     test_class;
     /** Reason for test failure, or <code>null</code> if the test was
