@@ -34,7 +34,7 @@ import rmi.io.RMIResponse;
  * connect to the same skeleton. Stubs are serializable.
  */
 public abstract class Stub {
-	private static class StubInvocationHandler implements InvocationHandler {
+	private static class StubInvocationHandler implements Serializable,InvocationHandler {
 		private InetSocketAddress serverSocketAddress;
 
 		public StubInvocationHandler(InetSocketAddress address) {
@@ -218,7 +218,7 @@ public abstract class Stub {
 	 *             <code>RMIException</code>, or if an object implementing this
 	 *             interface cannot be dynamically created.
 	 */
-	public static <T> T create(Class<T> c, Skeleton<T> skeleton) /*throws UnknownHostException*/ {
+	public static <T> T create(Class<T> c, Skeleton<T> skeleton) {
 		if (c == null || skeleton == null) {
 			throw new NullPointerException("Paramaters of create method should be non-null.");
 		}
