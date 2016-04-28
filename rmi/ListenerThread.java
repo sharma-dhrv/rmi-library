@@ -35,13 +35,6 @@ public class ListenerThread<T> extends Thread {
 	public void run() {
 
 		isActive = true;
-
-		// DELETE
-		//System.err.println("Running...");
-
-		// while (isActive && listenerSocket != null &&
-		// !listenerSocket.isClosed()) {
-		// DELETE
 		while (isActive) {
 			Socket clientConnection = null;
 			try {
@@ -79,7 +72,6 @@ public class ListenerThread<T> extends Thread {
 			threadPool.execute(handler);
 		}
 		
-		closeConnection();
 
 		System.out.println("Shutting down thread pool...");
 		threadPool.shutdown();
@@ -88,48 +80,20 @@ public class ListenerThread<T> extends Thread {
 			threadPool.shutdownNow();
 		}
 
-		// try {
-		// // TODO Remove these Sys Out prints in the final version.
-		// System.out.println("Shutting down thread pool...");
-		// threadPool.shutdown();
-		// if (!threadPool.isTerminated()) {
-		// threadPool.awaitTermination(1, TimeUnit.SECONDS);
-		// }
-		// } catch (InterruptedException e) {
-		// System.err.println("Thread pool shutdown process was interrupted.
-		// Ignoring the exception: "
-		// + "ServerClass: " + serverClass.getName() + ", " + "IPAddress: "
-		// + ((InetSocketAddress)
-		// listenerSocket.getLocalSocketAddress()).getHostString() + ", " +
-		// "Port: "
-		// + ((InetSocketAddress)
-		// listenerSocket.getLocalSocketAddress()).getPort());
-		// e.printStackTrace();
-		// } finally {
-		// if(!threadPool.isTerminated()) {
-		// System.out.println("Force terminating thread pool...");
-		// threadPool.shutdownNow();
-		// }
-		// }
+		
 		System.out.println("Thread pool terminated.");
-		// DELETE
-		//System.err.println("Thread pool terminated.");
-		container.stopped(cause);
+		
+		closeConnection();
+		container.confirmTermination(cause);
 	}
 
 	public void terminate() {
 		if (this.isActive) {
 			this.isActive = false;
 			closeConnection();
-			// DELETE
-			//System.err.println("Term 1");
 		} else {
-			// DELETE
-			//System.err.println("Term 2");
 			closeConnection();
-			container.stopped(null);
-			// DELETE
-			//System.err.println("Term 3");
+			container.confirmTermination(null);
 		}
 	}
 

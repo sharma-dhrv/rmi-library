@@ -150,17 +150,7 @@ public class Skeleton<T> {
 	 *            if the skeleton stopped normally.
 	 */
 	protected void stopped(Throwable cause) {
-		if (cause == null) {
-			System.out.println("The Skeleton has stopped: " + "ServerClass: " + serverClass.getName() + ", "
-					+ "IPAddress: " + bindAddress.getAddress().toString() + ", " + "Port: " + bindAddress.getPort());
-		} else {
-			System.err.println("The Skeleton has stopped due to an exception: " + "ServerClass: "
-					+ serverClass.getName() + ", " + "IPAddress: " + bindAddress.getAddress().toString() + ", "
-					+ "Port: " + bindAddress.getPort());
-		}
-		this.isActive = false;
-		this.listenerSocket = null;
-		this.listener = null;
+		// Do nothing
 	}
 
 	/**
@@ -218,6 +208,7 @@ public class Skeleton<T> {
 					listenerSocket = new ServerSocket(bindAddress.getPort(), maxQueueLength, bindAddress.getAddress());
 				} else {
 					listenerSocket = new ServerSocket(0, maxQueueLength);
+					bindAddress = (InetSocketAddress) listenerSocket.getLocalSocketAddress();
 				}
 				listener = new ListenerThread<T>(this, serverClass, serverObject, listenerSocket);
 				listener.start();
@@ -248,15 +239,25 @@ public class Skeleton<T> {
 	public synchronized void stop() {
 		if (isActive) {
 			listener.terminate();
-			isActive = false;	// only a workaround.
 		}
 	}
 
 	protected InetSocketAddress getBindAddress() {
-		if(isActive) {
-			return (InetSocketAddress) listenerSocket.getLocalSocketAddress();
+		return bindAddress;
+	}
+	
+	protected void confirmTermination(Throwable cause) {
+		if (cause == null) {
+			System.out.println("The Skeleton has stopped: " + "ServerClass: " + serverClass.getName() + ", "
+					+ "IPAddress: " + bindAddress.getAddress().toString() + ", " + "Port: " + bindAddress.getPort());
+		} else {
+			System.err.println("The Skeleton has stopped due to an exception: " + "ServerClass: "
+					+ serverClass.getName() + ", " + "IPAddress: " + bindAddress.getAddress().toString() + ", "
+					+ "Port: " + bindAddress.getPort());
 		}
-		
-		return null;
+		isActive = false;
+		listenerSocket = null;
+		listener = null;
+		stopped(cause);
 	}
 }
