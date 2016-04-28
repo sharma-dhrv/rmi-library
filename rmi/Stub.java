@@ -218,7 +218,7 @@ public abstract class Stub {
 	 *             <code>RMIException</code>, or if an object implementing this
 	 *             interface cannot be dynamically created.
 	 */
-	public static <T> T create(Class<T> c, Skeleton<T> skeleton) throws UnknownHostException {
+	public static <T> T create(Class<T> c, Skeleton<T> skeleton) /*throws UnknownHostException*/ {
 		if (c == null || skeleton == null) {
 			throw new NullPointerException("Paramaters of create method should be non-null.");
 		}

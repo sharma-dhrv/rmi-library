@@ -248,6 +248,7 @@ public class Skeleton<T> {
 	public synchronized void stop() {
 		if (isActive) {
 			listener.terminate();
+			isActive = false;	// only a workaround.
 		}
 	}
 
