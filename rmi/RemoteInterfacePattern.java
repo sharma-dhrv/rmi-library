@@ -9,6 +9,11 @@ import java.lang.reflect.Method;
 public final class RemoteInterfacePattern {
 
 	public static boolean isRemoteInterface(Class clazz) {
+
+		if(!clazz.isInterface()) {
+			return false;
+		}
+
 		boolean allRemoteMethods = true;
 		boolean hasDeclaredMethods = false;
 		for (Method method : clazz.getDeclaredMethods()) {
