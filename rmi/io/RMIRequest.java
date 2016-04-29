@@ -18,8 +18,8 @@ public class RMIRequest implements Serializable {
 	public RMIRequest(String className, String methodName, Object[] arguments, String[] argumentTypes) {
 		this.className = className;
 		this.methodName = methodName;
-		this.arguments = arguments;
-		this.argumentTypes = argumentTypes;
+		this.arguments = ((arguments == null) ? new Object[]{} : arguments);
+		this.argumentTypes = ((argumentTypes == null) ? new String[]{} : argumentTypes);
 	}
 	
 	public String getClassName() {

@@ -5,36 +5,51 @@
 package rmi;
 
 import java.lang.reflect.Method;
-import java.lang.*;
 
 public final class RemoteInterfacePattern {
-	
+
 	public static boolean isRemoteInterface(Class clazz) {
-		boolean allThrowRMIException = true;
-		for(Method method : clazz.getDeclaredMethods()) {
-			boolean hasRMIException = false;
-			for(Class exceptionClass : method.getExceptionTypes()) {
-				if(exceptionClass.equals(RMIException.class)) {
-					hasRMIException = true;
-					break;
-				}
-			}
-			if(!hasRMIException) {
-				allThrowRMIException = false;
+		boolean allRemoteMethods = true;
+		boolean hasDeclaredMethods = false;
+		for (Method method : clazz.getDeclaredMethods()) {
+			hasDeclaredMethods = true;
+			boolean isRemoteMethod = isRemoteMethod(method);
+			if (!isRemoteMethod) {
+				allRemoteMethods = false;
 				break;
 			}
 		}
-		
-		return allThrowRMIException;
+
+		// It might be an empty interface but it might have ancestor interfaces
+		// that are remote.
+		boolean hasAncestors = false;
+		if (!allRemoteMethods || !hasDeclaredMethods) {
+			Class[] implementedInterfaces = clazz.getInterfaces();
+			for (Class iface : implementedInterfaces) {
+				hasAncestors = true;
+				if (isRemoteInterface(iface)) {
+					return true;
+				}
+			}
+
+			// It has ancestors but none of them is a remote interface or else
+			// control wouldn't reach here. So, it is also not a remote
+			// interface.
+			if (hasAncestors) {
+				return false;
+			}
+		}
+
+		return allRemoteMethods;
 	}
-	
+
 	public static boolean isRemoteMethod(Method method) {
-		for(Class exceptionClass : method.getExceptionTypes()) {
-			if(exceptionClass.equals(RMIException.class)) {
+		for (Class exceptionClass : method.getExceptionTypes()) {
+			if (exceptionClass.equals(RMIException.class)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 }

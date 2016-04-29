@@ -28,20 +28,27 @@ public class MethodInvocationTask<T> implements Runnable {
 		this.clientConnection = clientConnection;
 	}
 
-	private Method getMatchingMethod(String methodName, String[] arguments) {
-		for (Method m : serverClass.getDeclaredMethods()) {
-			Class[] paramTypes = m.getParameterTypes();
-			if (methodName.equals(m.getName()) && arguments.length == paramTypes.length) {
+	private Method getMatchingMethod(Class clazz, String methodName, String[] argumentTypes) {
+		for (Method method : clazz.getDeclaredMethods()) {
+			Class[] paramTypes = method.getParameterTypes();
+			if (methodName.equals(method.getName()) && (argumentTypes.length == paramTypes.length)) {
 				boolean found = true;
-				for (int i = 0; i < arguments.length; i++) {
-					if (!paramTypes[i].getName().equals(arguments[i])) {
+				for (int i = 0; i < argumentTypes.length; i++) {
+					if (!paramTypes[i].getName().equals(argumentTypes[i])) {
 						found = false;
 					}
 				}
 
 				if (found) {
-					return m;
+					return method;
 				}
+			}
+		}
+
+		for (Class iface : clazz.getInterfaces()) {
+			Method method = getMatchingMethod(iface, methodName, argumentTypes);
+			if (method != null) {
+				return method;
 			}
 		}
 
@@ -98,9 +105,10 @@ public class MethodInvocationTask<T> implements Runnable {
 		Object[] arguments = request.getArguments();
 		String[] argumentTypes = request.getArgumentTypes();
 
-		if (className.equals(serverClass.getName())) {
+		// if (className.equals(serverClass.getName())) {
+		if (isAncestorOrEqual(serverClass, className)) {
 
-			Method matchingMethod = getMatchingMethod(methodName, argumentTypes);
+			Method matchingMethod = getMatchingMethod(serverClass, methodName, argumentTypes);
 			if (matchingMethod != null) {
 				try {
 					Object returnValue = matchingMethod.invoke(serverObj, arguments);
@@ -108,10 +116,11 @@ public class MethodInvocationTask<T> implements Runnable {
 				} catch (InvocationTargetException e) {
 					response = new RMIResponse((Exception) e.getTargetException());
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					System.err.println("Failed to invoke the designated method: " + "ServerClass: " + serverClass.getName() + ", "
-							+ "IPAddress: " + container.getBindAddress().getAddress().toString() + ", " + "Port: "
-							+ container.getBindAddress().getPort() + ", " + "ClientClass: " + className + ", " + "Method: "
-							+ methodName + ", " + "Arguments: " + arguments);
+					System.err.println(
+							"Failed to invoke the designated method: " + "ServerClass: " + serverClass.getName() + ", "
+									+ "IPAddress: " + container.getBindAddress().getAddress().toString() + ", "
+									+ "Port: " + container.getBindAddress().getPort() + ", " + "ClientClass: "
+									+ className + ", " + "Method: " + methodName + ", " + "Arguments: " + arguments);
 					RMIException exception = new RMIException(e);
 					container.service_error(exception);
 					response = new RMIResponse(exception);
@@ -146,6 +155,20 @@ public class MethodInvocationTask<T> implements Runnable {
 		}
 
 		closeConnection();
+	}
+
+	private boolean isAncestorOrEqual(Class currentClass, String ancestorClassName) {
+		if (currentClass.getName().equals(ancestorClassName)) {
+			return true;
+		} else {
+			for (Class iface : serverClass.getInterfaces()) {
+				if (isAncestorOrEqual(iface, ancestorClassName)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private void closeConnection() {
