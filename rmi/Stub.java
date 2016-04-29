@@ -36,6 +36,7 @@ import rmi.io.RMIResponse;
 public abstract class Stub {
 	private static class StubInvocationHandler implements Serializable,InvocationHandler {
 		private InetSocketAddress serverSocketAddress;
+		private Method method;
 
 		public StubInvocationHandler(InetSocketAddress address) {
 			this.serverSocketAddress = address;
@@ -43,6 +44,7 @@ public abstract class Stub {
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
+			this.method = method;
 			StubInvocationHandler sih = (StubInvocationHandler) Proxy.getInvocationHandler(proxy);
 
 			if (methodName.equals("equals")) {
@@ -51,6 +53,10 @@ public abstract class Stub {
 
 			if (methodName.equals("hashCode")) {
 				return sih.serverSocketAddress.hashCode() + proxy.getClass().hashCode();
+			}
+
+			if (methodName.equals("toString")) {
+				toString();
 			}
 
 			try {
@@ -99,8 +105,8 @@ public abstract class Stub {
 			}
 
 			String[] argumentTypes = getArgumentTypes(method);
-			//System.out.println("Calling Remote Method: " + method.getDeclaringClass().getName() + "." + method.getName()
-			//		+ "(" + args + " : " + argumentTypes.toString() + ")");
+			System.err.println("Calling Remote Method: " + method.getDeclaringClass().getName() + "." + method.getName()
+					+ "(" + args + " : " + argumentTypes.toString() + ")");
 			request = new RMIRequest(method.getDeclaringClass().getName(), method.getName(), args, argumentTypes);
 			try {
 				out.writeObject(request);
@@ -136,23 +142,25 @@ public abstract class Stub {
 			}
 
 			if (!Proxy.isProxyClass(proxy.getClass())) {
-				//System.out.println("1f");
 				return false;
 			}
 
 			InvocationHandler sih = Proxy.getInvocationHandler(proxy);
 			if (!(sih instanceof StubInvocationHandler)) {
-				//System.out.println("2f");
 				return false;
 			}
 
 			if (!serverSocketAddress.equals(((StubInvocationHandler) sih).serverSocketAddress)) {
-				//System.out.println("3f");
 				return false;
 			}
 
 			return true;
 
+		}
+
+		public String toString() {
+			System.err.println("PORT : " + serverSocketAddress.getPort() + " HOSTNAME : " + serverSocketAddress.getHostName() + " INTERFACE-NAME : " + this.method.getDeclaringClass().getName());
+			return "PORT : " + serverSocketAddress.getPort() + " HOSTNAME : " + serverSocketAddress.getHostName() + " INTERFACE-NAME : " + method.getDeclaringClass().getName();
 		}
 
 		// This is to handle a local invoke
