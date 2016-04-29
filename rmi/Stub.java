@@ -36,28 +36,24 @@ import rmi.io.RMIResponse;
 public abstract class Stub {
 	private static class StubInvocationHandler implements Serializable,InvocationHandler {
 		private InetSocketAddress serverSocketAddress;
-		private Method method;
+		private Class<?> c;
 
-		public StubInvocationHandler(InetSocketAddress address) {
+		public StubInvocationHandler(InetSocketAddress address, Class<?> c) {
 			this.serverSocketAddress = address;
+			this.c = c;
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
-			this.method = method;
 			StubInvocationHandler sih = (StubInvocationHandler) Proxy.getInvocationHandler(proxy);
 
-			if (methodName.equals("equals")) {
+			/*if (methodName.equals("equals")) {
 				equals(proxy);
 			}
 
 			if (methodName.equals("hashCode")) {
 				return sih.serverSocketAddress.hashCode() + proxy.getClass().hashCode();
-			}
-
-			if (methodName.equals("toString")) {
-				toString();
-			}
+			}*/
 
 			try {
 				if (RemoteInterfacePattern.isRemoteMethod(method)) {
@@ -135,6 +131,10 @@ public abstract class Stub {
 
 		}
 
+		public int hashCode() {
+			return toString().hashCode();
+		}
+
 		public boolean equals(Object proxy) {
 
 			if (proxy == null) {
@@ -154,13 +154,17 @@ public abstract class Stub {
 				return false;
 			}
 
+			if (this.c.getName() != ((StubInvocationHandler) sih).c.getName()) {
+				return false;
+			}
+
 			return true;
 
 		}
 
 		public String toString() {
-			System.err.println("PORT : " + serverSocketAddress.getPort() + " HOSTNAME : " + serverSocketAddress.getHostName() + " INTERFACE-NAME : " + this.method.getDeclaringClass().getName());
-			return "PORT : " + serverSocketAddress.getPort() + " HOSTNAME : " + serverSocketAddress.getHostName() + " INTERFACE-NAME : " + method.getDeclaringClass().getName();
+			System.err.println("PORT : " + serverSocketAddress.getPort() + " HOSTNAME : " + serverSocketAddress.getHostName() + " INTERFACE-NAME : " + c.getName());
+			return "PORT : " + serverSocketAddress.getPort() + " HOSTNAME : " + serverSocketAddress.getHostName() + " INTERFACE-NAME : " + c.getName();
 		}
 
 		// This is to handle a local invoke
@@ -340,7 +344,7 @@ public abstract class Stub {
 
 	@SuppressWarnings("unchecked")
 	private static <T> T doCreate(Class<T> c, InetSocketAddress address) {
-		InvocationHandler invocationHandler = new StubInvocationHandler(address);
+		InvocationHandler invocationHandler = new StubInvocationHandler(address, c);
 		T instance = (T) Proxy.newProxyInstance(c.getClassLoader(), new Class<?>[] { c, Serializable.class }, invocationHandler);
 		return instance;
 	}
