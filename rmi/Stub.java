@@ -34,7 +34,10 @@ import rmi.io.RMIResponse;
  * connect to the same skeleton. Stubs are serializable.
  */
 public abstract class Stub {
-	private static class StubInvocationHandler implements Serializable,InvocationHandler {
+	private static class StubInvocationHandler implements Serializable, InvocationHandler {
+
+		private static final long serialVersionUID = -9213645686207656988L;
+
 		private InetSocketAddress serverSocketAddress;
 		private Class<?> c;
 
@@ -44,19 +47,9 @@ public abstract class Stub {
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			String methodName = method.getName();
-			StubInvocationHandler sih = (StubInvocationHandler) Proxy.getInvocationHandler(proxy);
-
-			/*if (methodName.equals("equals")) {
-				equals(proxy);
-			}
-
-			if (methodName.equals("hashCode")) {
-				return sih.serverSocketAddress.hashCode() + proxy.getClass().hashCode();
-			}*/
 
 			try {
-				if (RemoteInterfacePattern.isRemoteMethod(method)) {
+				if (RemotePattern.isRemoteMethod(method)) {
 					return remoteInvoke(proxy, method, args);
 				} else {
 					return localInvoke(proxy, method, args);
@@ -66,7 +59,6 @@ public abstract class Stub {
 			}
 		}
 
-		// This is to handle a remote invoke
 		@SuppressWarnings("rawtypes")
 		private Object remoteInvoke(Object proxy, Method method, Object[] args) throws Throwable {
 			Socket socket = null;
@@ -101,8 +93,9 @@ public abstract class Stub {
 			}
 
 			String[] argumentTypes = getArgumentTypes(method);
-			System.err.println("Calling Remote Method: " + method.getDeclaringClass().getName() + "." + method.getName()
-					+ "(" + args + " : " + argumentTypes.toString() + ")");
+			// System.err.println("Calling Remote Method: " +
+			// method.getDeclaringClass().getName() + "." + method.getName()
+			// + "(" + args + " : " + argumentTypes.toString() + ")");
 			request = new RMIRequest(method.getDeclaringClass().getName(), method.getName(), args, argumentTypes);
 			try {
 				out.writeObject(request);
@@ -125,7 +118,8 @@ public abstract class Stub {
 			if (response.getException() == null) {
 				return response.getReturnValue();
 			} else {
-				//System.out.println("Remote method execution threw an exception." + response.getException().getClass().getName());
+				// System.out.println("Remote method execution threw an
+				// exception." + response.getException().getClass().getName());
 				throw (Throwable) response.getException();
 			}
 
@@ -163,11 +157,13 @@ public abstract class Stub {
 		}
 
 		public String toString() {
-			System.err.println("PORT : " + serverSocketAddress.getPort() + " HOSTNAME : " + serverSocketAddress.getHostName() + " INTERFACE-NAME : " + c.getName());
-			return "PORT : " + serverSocketAddress.getPort() + " HOSTNAME : " + serverSocketAddress.getHostName() + " INTERFACE-NAME : " + c.getName();
+			System.err.println("PORT : " + serverSocketAddress.getPort() + " HOSTNAME : "
+					+ serverSocketAddress.getHostName() + " INTERFACE-NAME : " + c.getName());
+			return "PORT : " + serverSocketAddress.getPort() + " HOSTNAME : " + serverSocketAddress.getHostName()
+					+ " INTERFACE-NAME : " + c.getName();
 		}
 
-		// This is to handle a local invoke
+		
 		private Object localInvoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
 			StubInvocationHandler sih = (StubInvocationHandler) Proxy.getInvocationHandler(proxy);
@@ -214,7 +210,7 @@ public abstract class Stub {
 	 * @param skeleton
 	 *            The skeleton whose network address is to be used.
 	 * @param <T>
-	 *						Generic class typeparameter
+	 *            Generic class typeparameter
 	 * @return The stub created.
 	 * @throws IllegalStateException
 	 *             If the skeleton has not been assigned an address by the user
@@ -235,7 +231,7 @@ public abstract class Stub {
 			throw new NullPointerException("Paramaters of create method should be non-null.");
 		}
 
-		if (!RemoteInterfacePattern.isRemoteInterface(c)) {
+		if (!RemotePattern.isRemoteInterface(c)) {
 			throw new Error("c is not a remote interface.");
 		}
 
@@ -274,7 +270,7 @@ public abstract class Stub {
 	 * @param hostname
 	 *            The hostname with which the stub will be created.
 	 * @param <T>
-	 *						Generic class typeparameter
+	 *            Generic class typeparameter
 	 * @return The stub created.
 	 * @throws IllegalStateException
 	 *             If the skeleton has not been assigned a port.
@@ -291,7 +287,7 @@ public abstract class Stub {
 			throw new NullPointerException("Paramater of create should be non-null.");
 		}
 
-		if (!RemoteInterfacePattern.isRemoteInterface(c)) {
+		if (!RemotePattern.isRemoteInterface(c)) {
 			throw new Error("c is not a remote interface.");
 		}
 
@@ -320,7 +316,7 @@ public abstract class Stub {
 	 * @param address
 	 *            The network address of the remote skeleton.
 	 * @param <T>
-	 *						Generic class typeparameter
+	 *            Generic class typeparameter
 	 * @return The stub created.
 	 * @throws NullPointerException
 	 *             If any argument is <code>null</code>.
@@ -335,7 +331,7 @@ public abstract class Stub {
 			throw new NullPointerException("Paramater of create should be non-null.");
 		}
 
-		if (!RemoteInterfacePattern.isRemoteInterface(c)) {
+		if (!RemotePattern.isRemoteInterface(c)) {
 			throw new Error("c is not a remote interface.");
 		}
 
@@ -345,7 +341,8 @@ public abstract class Stub {
 	@SuppressWarnings("unchecked")
 	private static <T> T doCreate(Class<T> c, InetSocketAddress address) {
 		InvocationHandler invocationHandler = new StubInvocationHandler(address, c);
-		T instance = (T) Proxy.newProxyInstance(c.getClassLoader(), new Class<?>[] { c, Serializable.class }, invocationHandler);
+		T instance = (T) Proxy.newProxyInstance(c.getClassLoader(), new Class<?>[] { c, Serializable.class },
+				invocationHandler);
 		return instance;
 	}
 }

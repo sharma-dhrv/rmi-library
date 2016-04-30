@@ -1,3 +1,7 @@
+/**
+ * @author Dhruv Sharma (dhsharma@cs.ucsd.edu)
+ */
+
 package rmi;
 
 import java.io.IOException;
@@ -27,15 +31,39 @@ import java.net.ServerSocket;
  * <code>service_error</code>.
  */
 public class Skeleton<T> {
-	
+
+	/**
+	 * Max waiting connection queue length for server socket
+	 */
 	public static final int maxQueueLength = 50;
 
+	/**
+	 * The server object on which the skeleton executes the remote method calls
+	 * on.
+	 */
 	private T serverObject;
+	/**
+	 * The remote interface class object represented by the skeleton.
+	 */
 	private Class<T> serverClass;
+	/**
+	 * The socket address on which the listener socket binds to accept
+	 * connections.
+	 */
 	private InetSocketAddress bindAddress;
+	/**
+	 * The listener thread that implements the socket listener that listens on
+	 * the given bind address and spawns handler threads.
+	 */
 	private ListenerThread<T> listener;
+	/**
+	 * The listener socket on which skeleton accepts connections for remote
+	 * calls.
+	 */
 	private ServerSocket listenerSocket;
-
+	/**
+	 * A boolean status of whether the skeleton is running/listening or not.
+	 */
 	private boolean isActive;
 
 	/**
@@ -71,7 +99,7 @@ public class Skeleton<T> {
 			throw new NullPointerException("Server object cannot be null.");
 		}
 
-		if (!RemoteInterfacePattern.isRemoteInterface(c)) {
+		if (!RemotePattern.isRemoteInterface(c)) {
 			throw new Error("Not a remote interface: " + "ClassName: " + c.getName());
 		}
 
@@ -117,7 +145,7 @@ public class Skeleton<T> {
 			throw new NullPointerException("Server object cannot be null.");
 		}
 
-		if (!RemoteInterfacePattern.isRemoteInterface(c)) {
+		if (!RemotePattern.isRemoteInterface(c)) {
 			throw new Error("Not a remote interface: " + "ClassName: " + c.getName());
 		}
 
@@ -242,10 +270,25 @@ public class Skeleton<T> {
 		}
 	}
 
+	/**
+	 * Returns the socket address on which the skeleton binds and listens for
+	 * connections of remote method calls.
+	 * 
+	 * @return socket address to bind on.
+	 */
 	protected InetSocketAddress getBindAddress() {
 		return bindAddress;
 	}
-	
+
+	/**
+	 * The method is called by the listener thread when it terminates. It is
+	 * used to clean-up and update inner state, before stopped is called.
+	 * 
+	 * @param cause
+	 *            the cause of termination of listener thread; <code>null</code>
+	 *            if the termination was due to the stop request to the
+	 *            skeleton.
+	 */
 	protected void confirmTermination(Throwable cause) {
 		if (cause == null) {
 			System.out.println("The Skeleton has stopped: " + "ServerClass: " + serverClass.getName() + ", "

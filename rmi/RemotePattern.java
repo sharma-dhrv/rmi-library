@@ -6,11 +6,24 @@ package rmi;
 
 import java.lang.reflect.Method;
 
-public final class RemoteInterfacePattern {
+/**
+ * The static class representing the patterns that must be followed by remote
+ * constructs.
+ */
+public final class RemotePattern {
 
+	/**
+	 * The method to check is the given interface class object is or implements
+	 * a remote interface.
+	 * 
+	 * @param clazz
+	 *            the interface class object
+	 * @return {@code true} if the interface is a remote interface;
+	 *         {@code false} otherwise
+	 */
 	public static boolean isRemoteInterface(Class clazz) {
 
-		if(!clazz.isInterface()) {
+		if (!clazz.isInterface()) {
 			return false;
 		}
 
@@ -48,6 +61,14 @@ public final class RemoteInterfacePattern {
 		return allRemoteMethods;
 	}
 
+	/**
+	 * Checks if the given method is a remote method.
+	 * 
+	 * @param method
+	 *            method object
+	 * @return {@code true} if the given method is a remote method;
+	 *         {@code false} otherwise.
+	 */
 	public static boolean isRemoteMethod(Method method) {
 		for (Class exceptionClass : method.getExceptionTypes()) {
 			if (exceptionClass.equals(RMIException.class)) {

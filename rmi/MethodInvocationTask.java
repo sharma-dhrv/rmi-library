@@ -11,23 +11,70 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 
+import org.omg.CORBA.Current;
+
 import rmi.io.RMIRequest;
 import rmi.io.RMIResponse;
 
+/**
+ * The runnable object executed in the thread pool that services a client
+ * connection to execute the remote method call on the {@link Skeleton} object.
+ *
+ * @param <T>
+ *            the generic remote interface this listener thread represents.
+ */
 public class MethodInvocationTask<T> implements Runnable {
 
+	/**
+	 * The skeleton object on which the remote method call is executed.
+	 */
 	private Skeleton<T> container;
-	private T serverObj;
+	/**
+	 * The object that the skeleton and this {@link Runnable} task represents.
+	 */
+	private T serverObject;
+	/**
+	 * The remote interface class object that the skeleton and this
+	 * {@link Runnable} task represents.
+	 */
 	private Class<T> serverClass;
+	/**
+	 * The client connection that the task accepts remote method calls and
+	 * returns the response on.
+	 */
 	private Socket clientConnection;
 
-	public MethodInvocationTask(Skeleton<T> container, T serverObj, Class<T> serverClass, Socket clientConnection) {
+	/**
+	 * The constructor to create a new {@link MethodInvocationTask} instance.
+	 * 
+	 * @param container
+	 * @param serverObject
+	 * @param serverClass
+	 * @param clientConnection
+	 */
+	public MethodInvocationTask(Skeleton<T> container, T serverObject, Class<T> serverClass, Socket clientConnection) {
 		this.container = container;
-		this.serverObj = serverObj;
+		this.serverObject = serverObject;
 		this.serverClass = serverClass;
 		this.clientConnection = clientConnection;
 	}
 
+	/**
+	 * The method returns a member {@link Method} instance of the given remote
+	 * interface that matches with the given method signature provided in the
+	 * remote call requests.
+	 * 
+	 * @param clazz
+	 *            The remote interface class object that this
+	 *            {@link MethodInvocationTask} represents.
+	 * @param methodName
+	 *            The remote method name that has been requested in the remote
+	 *            call.
+	 * @param argumentTypes
+	 *            The expected argument types of the remote method to be called.
+	 * @return {@link Method} instance; {@code null} if not such method is
+	 *         found.
+	 */
 	private Method getMatchingMethod(Class clazz, String methodName, String[] argumentTypes) {
 		for (Method method : clazz.getDeclaredMethods()) {
 			Class[] paramTypes = method.getParameterTypes();
@@ -55,6 +102,9 @@ public class MethodInvocationTask<T> implements Runnable {
 		return null;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void run() {
 		ObjectOutputStream outStream;
@@ -111,7 +161,7 @@ public class MethodInvocationTask<T> implements Runnable {
 			Method matchingMethod = getMatchingMethod(serverClass, methodName, argumentTypes);
 			if (matchingMethod != null) {
 				try {
-					Object returnValue = matchingMethod.invoke(serverObj, arguments);
+					Object returnValue = matchingMethod.invoke(serverObject, arguments);
 					response = new RMIResponse(returnValue);
 				} catch (InvocationTargetException e) {
 					response = new RMIResponse((Exception) e.getTargetException());
@@ -157,6 +207,19 @@ public class MethodInvocationTask<T> implements Runnable {
 		closeConnection();
 	}
 
+	/**
+	 * The methods checks if the expected {@code ancestorClass} represents the
+	 * interface either equal or inherited by the {@code currentClass} interface
+	 * class object.
+	 * 
+	 * @param currentClass
+	 *            the class object whose ancestry needs to searched in.
+	 * @param ancestorClassName
+	 *            the class to be expected in the ancestry of the
+	 *            {@code currentClass}
+	 * @return {@code true} if the expected interface is in the given classes
+	 *         hierarchy; {@code false} otherwise.
+	 */
 	private boolean isAncestorOrEqual(Class currentClass, String ancestorClassName) {
 		if (currentClass.getName().equals(ancestorClassName)) {
 			return true;
@@ -171,6 +234,9 @@ public class MethodInvocationTask<T> implements Runnable {
 		return false;
 	}
 
+	/**
+	 * The method closes the client connection for the remote method call.
+	 */
 	private void closeConnection() {
 		try {
 			clientConnection.close();

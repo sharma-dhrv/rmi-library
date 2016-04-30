@@ -12,26 +12,68 @@ import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * The listener thread that hosts the server socket and accepts and services
+ * multiple connections in {@link MethodInvocationTask} worker threads for each
+ * remote method call made on other skeleton object.
+ *
+ * @param <T>
+ *            the generic remote interface this listener thread represents.
+ */
 public class ListenerThread<T> extends Thread {
 
+	/**
+	 * The skeleton object that this listener thread instance represents.
+	 */
 	private Skeleton<T> container;
-	private T serverObj;
+	/**
+	 * The server object on which remote method calls are executed.
+	 */
+	private T serverObject;
+	/**
+	 * The remote interface class object represented by this listener thread.
+	 */
 	private Class<T> serverClass;
+	/**
+	 * The server socket on which the listener listens for connections.
+	 */
 	private ServerSocket listenerSocket;
+	/**
+	 * The boolean status representing if the listener thread is
+	 * running/listening or not.
+	 */
 	private boolean isActive;
+	/**
+	 * The cause due to which the listener thread terminated. {@code null} if
+	 * termination was requested and not due to an exception.
+	 */
 	private Throwable cause;
-
+	/**
+	 * The thread pool running the worker threads that service individual remote
+	 * method calls.
+	 */
 	private ExecutorService threadPool = Executors.newCachedThreadPool();
 
-	public ListenerThread(Skeleton<T> container, Class<T> serverClass, T serverObj, ServerSocket listenerSocket) {
+	/**
+	 * The constructor for the listener thread.
+	 * 
+	 * @param container
+	 * @param serverClass
+	 * @param serverObject
+	 * @param listenerSocket
+	 */
+	public ListenerThread(Skeleton<T> container, Class<T> serverClass, T serverObject, ServerSocket listenerSocket) {
 		this.container = container;
-		this.serverObj = serverObj;
+		this.serverObject = serverObject;
 		this.serverClass = serverClass;
 		this.listenerSocket = listenerSocket;
 		this.isActive = false;
 		this.cause = null;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void run() {
 
 		isActive = true;
@@ -67,11 +109,10 @@ public class ListenerThread<T> extends Thread {
 				}
 			}
 
-			MethodInvocationTask<T> handler = new MethodInvocationTask<T>(container, serverObj, serverClass,
+			MethodInvocationTask<T> handler = new MethodInvocationTask<T>(container, serverObject, serverClass,
 					clientConnection);
 			threadPool.execute(handler);
 		}
-		
 
 		System.out.println("Shutting down thread pool...");
 		threadPool.shutdown();
@@ -80,13 +121,15 @@ public class ListenerThread<T> extends Thread {
 			threadPool.shutdownNow();
 		}
 
-		
 		System.out.println("Thread pool terminated.");
-		
+
 		closeConnection();
 		container.confirmTermination(cause);
 	}
 
+	/**
+	 * The method to initiate termination of the listener thread.
+	 */
 	public void terminate() {
 		if (this.isActive) {
 			this.isActive = false;
@@ -97,6 +140,10 @@ public class ListenerThread<T> extends Thread {
 		}
 	}
 
+	/**
+	 * The method to close the server socket to prevent it from accepting
+	 * anymore connections.
+	 */
 	private void closeConnection() {
 		try {
 			listenerSocket.close();
