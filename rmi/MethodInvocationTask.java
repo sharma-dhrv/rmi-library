@@ -11,8 +11,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 
-import org.omg.CORBA.Current;
-
 import rmi.io.RMIRequest;
 import rmi.io.RMIResponse;
 
@@ -117,7 +115,7 @@ public class MethodInvocationTask<T> implements Runnable {
 		try {
 			outStream = new ObjectOutputStream(clientConnection.getOutputStream());
 			outStream.flush();
-		} catch (IOException e) {
+		} catch (IOException | NullPointerException e) {
 			System.err.println("Failed to get OutputStream from client connection: " + "ServerClass: "
 					+ serverClass.getName() + ", " + "IPAddress: " + container.getBindAddress().getAddress().toString()
 					+ ", " + "Port: " + container.getBindAddress().getPort());
@@ -129,7 +127,7 @@ public class MethodInvocationTask<T> implements Runnable {
 		}
 		try {
 			inStream = new ObjectInputStream(clientConnection.getInputStream());
-		} catch (IOException e) {
+		} catch (IOException | NullPointerException e) {
 			System.err.println("Failed to get IntputStream from client connection: " + "ServerClass: "
 					+ serverClass.getName() + ", " + "IPAddress: " + container.getBindAddress().getAddress().toString()
 					+ ", " + "Port: " + container.getBindAddress().getPort());
@@ -159,7 +157,6 @@ public class MethodInvocationTask<T> implements Runnable {
 		Object[] arguments = request.getArguments();
 		String[] argumentTypes = request.getArgumentTypes();
 
-		// if (className.equals(serverClass.getName())) {
 		if (isAncestorOrEqual(serverClass, className)) {
 
 			Method matchingMethod = getMatchingMethod(serverClass, methodName, argumentTypes);
@@ -244,10 +241,10 @@ public class MethodInvocationTask<T> implements Runnable {
 	private void closeConnection() {
 		try {
 			clientConnection.close();
-		} catch (IOException e) {
-			System.err.println("Failed to close client connection: " + "ServerClass: " + serverClass.getName() + ", "
-					+ "IPAddress: " + container.getBindAddress().getAddress().toString() + ", " + "Port: "
-					+ container.getBindAddress().getPort());
+		} catch (IOException | NullPointerException e) {
+			//System.err.println("Failed to close client connection: " + "ServerClass: " + serverClass.getName() + ", "
+			//		+ "IPAddress: " + container.getBindAddress().getAddress().toString() + ", " + "Port: "
+			//		+ container.getBindAddress().getPort());
 
 			container.service_error(new RMIException(e));
 		}

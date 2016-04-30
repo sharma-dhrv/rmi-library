@@ -13,7 +13,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.rmi.UnknownHostException;
 import java.util.ArrayList;
 
 import rmi.io.RMIRequest;
@@ -38,13 +37,13 @@ public abstract class Stub {
 	 * RMI StubInvocationHandler
 	 *
 	 * <p>
-	 * An implementation of the InvocationHandler interface for use with 
-	 * Remote Method Invocation (RMI). This invocation handler can be used in 
-	 * conjunction with a dynamic proxy instance as a replacement for a 
-	 * pregenerated stub class.
-	 * Applications are not expected to use this class directly. A remote object 
-	 * exported to use a dynamic proxy with UnicastRemoteObject or Activatable 
-	 * has an instance of this class as that proxy's invocation handler.
+	 * An implementation of the InvocationHandler interface for use with Remote
+	 * Method Invocation (RMI). This invocation handler can be used in
+	 * conjunction with a dynamic proxy instance as a replacement for a
+	 * pregenerated stub class. Applications are not expected to use this class
+	 * directly. A remote object exported to use a dynamic proxy with
+	 * UnicastRemoteObject or Activatable has an instance of this class as that
+	 * proxy's invocation handler.
 	 *
 	 */
 	private static class StubInvocationHandler implements Serializable, InvocationHandler {
@@ -55,14 +54,14 @@ public abstract class Stub {
 		private Class<?> c;
 
 		/**
-		 * Creates a new StubInvocationHandler constructed with the specified 
+		 * Creates a new StubInvocationHandler constructed with the specified
 		 * InetSocketAddress and the class.
 		 *
 		 * @param c
-         	 *            A <code>Class</code> object representing the interface
-         	 *            implemented by the remote object.
-         	 * @param address
-         	 *            The network address of the remote skeleton.
+		 *            A <code>Class</code> object representing the interface
+		 *            implemented by the remote object.
+		 * @param address
+		 *            The network address of the remote skeleton.
 		 */
 		public StubInvocationHandler(InetSocketAddress address, Class<?> c) {
 			this.serverSocketAddress = address;
@@ -71,21 +70,23 @@ public abstract class Stub {
 
 		/**
 		 * <p>
-		 * Processes a method invocation made on the encapsulating proxy instance, 
-		 * proxy, and returns the result.
+		 * Processes a method invocation made on the encapsulating proxy
+		 * instance, proxy, and returns the result.
 		 *
-		 * @param proxy 
-		 * 		The proxy instance that the method was invoked on
+		 * @param proxy
+		 *            The proxy instance that the method was invoked on
 		 * @param method
-		 *		The Method instance corresponding to the interface method invoked 
-		 *		on the proxy instance
+		 *            The Method instance corresponding to the interface method
+		 *            invoked on the proxy instance
 		 * @param args
-		 *		An array of objects containing the values of the arguments passed 
-		 * 		in the method invocation on the proxy instance, or null if the method 
-		 * 		takes no arguments
-		 * @return The value to return from the method invocation on the proxy instance
-		 * @throws Throwable 
-		 * 		 The exception to throw from the method invocation on the proxy instance
+		 *            An array of objects containing the values of the arguments
+		 *            passed in the method invocation on the proxy instance, or
+		 *            null if the method takes no arguments
+		 * @return The value to return from the method invocation on the proxy
+		 *         instance
+		 * @throws Throwable
+		 *             The exception to throw from the method invocation on the
+		 *             proxy instance
 		 *
 		 */
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -102,24 +103,26 @@ public abstract class Stub {
 		}
 
 		/**
-                 * <p>
-                 * Processes a remote method invocation made on the encapsulating proxy instance,
-                 * proxy, and returns the result.
-                 *
-                 * @param proxy
-                 *              The proxy instance that the method was invoked on
-                 * @param method
-                 *              The Method instance corresponding to the interface method invoked
-                 *              on the proxy instance
-                 * @param args
-                 *              An array of objects containing the values of the arguments passed
-                 *              in the method invocation on the proxy instance, or null if the method
-                 *              takes no arguments
-                 * @return The value to return from the method invocation on the proxy instance
-                 * @throws Throwable
-                 *               The exception to throw from the method invocation on the proxy instance
-                 *
-                 */
+		 * <p>
+		 * Processes a remote method invocation made on the encapsulating proxy
+		 * instance, proxy, and returns the result.
+		 *
+		 * @param proxy
+		 *            The proxy instance that the method was invoked on
+		 * @param method
+		 *            The Method instance corresponding to the interface method
+		 *            invoked on the proxy instance
+		 * @param args
+		 *            An array of objects containing the values of the arguments
+		 *            passed in the method invocation on the proxy instance, or
+		 *            null if the method takes no arguments
+		 * @return The value to return from the method invocation on the proxy
+		 *         instance
+		 * @throws Throwable
+		 *             The exception to throw from the method invocation on the
+		 *             proxy instance
+		 *
+		 */
 		@SuppressWarnings("rawtypes")
 		private Object remoteInvoke(Object proxy, Method method, Object[] args) throws Throwable {
 			Socket socket = null;
@@ -187,7 +190,7 @@ public abstract class Stub {
 		}
 
 		/**
-		 * <p> 
+		 * <p>
 		 * This function returns the hash code value of the proxy
 		 *
 		 * @return The hashCode value as an integer
@@ -198,14 +201,14 @@ public abstract class Stub {
 		}
 
 		/**
-                 * <p> 
-                 * Returns true if the argument is an instance of a dynamic proxy class and 
-		 * this invocation handler is equal to the invocation handler of that argument, 
-		 * and returns false otherwise.
-                 *
-                 * @return The boolean value after coparison
-                 *
-                 */
+		 * <p>
+		 * Returns true if the argument is an instance of a dynamic proxy class
+		 * and this invocation handler is equal to the invocation handler of
+		 * that argument, and returns false otherwise.
+		 *
+		 * @return The boolean value after comparison
+		 *
+		 */
 		public boolean equals(Object proxy) {
 
 			if (proxy == null) {
@@ -248,26 +251,27 @@ public abstract class Stub {
 		}
 
 		/**
-                 * <p>
-                 * Processes a local method invocation made on the encapsulating proxy instance,
-                 * proxy, and returns the result.
-                 *
-                 * @param proxy
-                 *              The proxy instance that the method was invoked on
-                 * @param method
-                 *              The Method instance corresponding to the interface method invoked
-                 *              on the proxy instance
-                 * @param args
-                 *              An array of objects containing the values of the arguments passed
-                 *              in the method invocation on the proxy instance, or null if the method
-                 *              takes no arguments
-                 * @return The value to return from the method invocation on the proxy instance
-                 * @throws Throwable
-                 *               The exception to throw from the method invocation on the proxy instance
-                 *
-                 */
+		 * <p>
+		 * Processes a local method invocation made on the encapsulating proxy
+		 * instance, proxy, and returns the result.
+		 *
+		 * @param proxy
+		 *            The proxy instance that the method was invoked on
+		 * @param method
+		 *            The Method instance corresponding to the interface method
+		 *            invoked on the proxy instance
+		 * @param args
+		 *            An array of objects containing the values of the arguments
+		 *            passed in the method invocation on the proxy instance, or
+		 *            null if the method takes no arguments
+		 * @return The value to return from the method invocation on the proxy
+		 *         instance
+		 * @throws Throwable
+		 *             The exception to throw from the method invocation on the
+		 *             proxy instance
+		 *
+		 */
 		private Object localInvoke(Object proxy, Method method, Object[] args) throws Throwable {
-			String methodName = method.getName();
 			StubInvocationHandler sih = (StubInvocationHandler) Proxy.getInvocationHandler(proxy);
 
 			return method.invoke(sih, args);
@@ -275,12 +279,12 @@ public abstract class Stub {
 
 		/**
 		 * <p>
-		 * This function accepts the socket and closes the 
-		 * connection associated with the socket
+		 * This function accepts the socket and closes the connection associated
+		 * with the socket
 		 *
 		 * @param socket
-		 *		The socket used for communication between the skeleton and
-		 *		the stub
+		 *            The socket used for communication between the skeleton and
+		 *            the stub
 		 *
 		 */
 		private void closeConnection(Socket socket) {
@@ -297,7 +301,7 @@ public abstract class Stub {
 		 * where each string is the type of an argument of the method
 		 *
 		 * @param method
-		 *		The method object
+		 *            The method object
 		 *
 		 * @return Array of strings of argument types of method
 		 *
@@ -361,7 +365,6 @@ public abstract class Stub {
 		}
 
 		return doCreate(c, remoteAddress);
-
 	}
 
 	/**
@@ -419,7 +422,6 @@ public abstract class Stub {
 		InetSocketAddress remoteAddress = new InetSocketAddress(hostname, address.getPort());
 
 		return doCreate(c, remoteAddress);
-		// throw new UnsupportedOperationException("not implemented");
 	}
 
 	/**
@@ -464,15 +466,15 @@ public abstract class Stub {
 	 * The function creates a proxy instance with the StubInvocationHandler
 	 *
 	 * @param c
-	 *	      A <code>Class</code> object representing the interface
-         *            implemented by the remote object.
+	 *            A <code>Class</code> object representing the interface
+	 *            implemented by the remote object.
 	 * @param <T>
-         *            Generic class typeparameter
-         * @param address
-         *            The network address of the remote skeleton.
+	 *            Generic class typeparameter
+	 * @param address
+	 *            The network address of the remote skeleton.
 	 * @return The stub created.
 	 *
-	 */	
+	 */
 	@SuppressWarnings("unchecked")
 	private static <T> T doCreate(Class<T> c, InetSocketAddress address) {
 		InvocationHandler invocationHandler = new StubInvocationHandler(address, c);
