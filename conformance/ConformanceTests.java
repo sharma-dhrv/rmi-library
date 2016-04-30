@@ -7,9 +7,7 @@ import test.*;
     <p>
     Tests performed are:
     <ul>
-    <li>{@link conformance.rmi.SkeletonTest}</li>
     <li>{@link conformance.rmi.StubTest}</li>
-    <li>{@link conformance.rmi.ConnectionTest}</li>
     <li>{@link conformance.rmi.ThreadTest}</li>
     </ul>
  */

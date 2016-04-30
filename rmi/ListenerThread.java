@@ -58,9 +58,13 @@ public class ListenerThread<T> extends Thread {
 	 * The constructor for the listener thread.
 	 * 
 	 * @param container
+	 *		The skeleton object
 	 * @param serverClass
+	 *		The class object of server
 	 * @param serverObject
+	 *		The generic server object
 	 * @param listenerSocket
+	 *		The listener socket
 	 */
 	public ListenerThread(Skeleton<T> container, Class<T> serverClass, T serverObject, ServerSocket listenerSocket) {
 		this.container = container;

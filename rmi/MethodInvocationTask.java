@@ -45,13 +45,17 @@ public class MethodInvocationTask<T> implements Runnable {
 	private Socket clientConnection;
 
 	/**
-	 * The constructor to create a new {@link MethodInvocationTask} instance.
-	 * 
-	 * @param container
-	 * @param serverObject
-	 * @param serverClass
-	 * @param clientConnection
-	 */
+         * The constructor to create a new {@link MethodInvocationTask} instance.
+         *
+         * @param container
+         *              The skeleton object
+         * @param serverClass
+         *              The class object of server
+         * @param serverObject
+         *              The generic server object
+         * @param clientConnection
+         *              The listener socket
+         */
 	public MethodInvocationTask(Skeleton<T> container, T serverObject, Class<T> serverClass, Socket clientConnection) {
 		this.container = container;
 		this.serverObject = serverObject;
