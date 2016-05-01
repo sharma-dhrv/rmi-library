@@ -33,7 +33,6 @@ public class ToStringTest extends Test
 
         try
         {
-	    System.err.println(SimpleInterface.class.getSimpleName());
             if(stub.toString().indexOf(SimpleInterface.class.getSimpleName())
                == -1)
             {

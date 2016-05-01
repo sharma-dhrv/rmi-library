@@ -115,7 +115,7 @@ public class MethodInvocationTask<T> implements Runnable {
 		try {
 			outStream = new ObjectOutputStream(clientConnection.getOutputStream());
 			outStream.flush();
-		} catch (IOException | NullPointerException e) {
+		} catch (IOException e) {
 			System.err.println("Failed to get OutputStream from client connection: " + "ServerClass: "
 					+ serverClass.getName() + ", " + "IPAddress: " + container.getBindAddress().getAddress().toString()
 					+ ", " + "Port: " + container.getBindAddress().getPort());
@@ -124,14 +124,24 @@ public class MethodInvocationTask<T> implements Runnable {
 
 			closeConnection();
 			return; // Nothing can be done so simply exit.
+		} catch (NullPointerException e) {
+			container.service_error(new RMIException(e));
+
+			closeConnection();
+			return; // Nothing can be done so simply exit.
 		}
 		try {
 			inStream = new ObjectInputStream(clientConnection.getInputStream());
-		} catch (IOException | NullPointerException e) {
+		} catch (IOException e) {
 			System.err.println("Failed to get IntputStream from client connection: " + "ServerClass: "
 					+ serverClass.getName() + ", " + "IPAddress: " + container.getBindAddress().getAddress().toString()
 					+ ", " + "Port: " + container.getBindAddress().getPort());
 
+			container.service_error(new RMIException(e));
+
+			closeConnection();
+			return; // Nothing can be done so simply exit.
+		} catch (NullPointerException e) {
 			container.service_error(new RMIException(e));
 
 			closeConnection();
@@ -241,11 +251,13 @@ public class MethodInvocationTask<T> implements Runnable {
 	private void closeConnection() {
 		try {
 			clientConnection.close();
-		} catch (IOException | NullPointerException e) {
-			//System.err.println("Failed to close client connection: " + "ServerClass: " + serverClass.getName() + ", "
-			//		+ "IPAddress: " + container.getBindAddress().getAddress().toString() + ", " + "Port: "
-			//		+ container.getBindAddress().getPort());
+		} catch (IOException e) {
+			System.err.println("Failed to close client connection: " + "ServerClass: " + serverClass.getName() + ", "
+					+ "IPAddress: " + container.getBindAddress().getAddress().toString() + ", " + "Port: "
+					+ container.getBindAddress().getPort());
 
+			container.service_error(new RMIException(e));
+		} catch (NullPointerException e) {
 			container.service_error(new RMIException(e));
 		}
 	}
